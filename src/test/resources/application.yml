@@ -1,0 +1,23 @@
+server:
+  port: 9090
+spring:
+  datasource:
+    url: jdbc:h2:mem:occupations_db;IGNORECASE=TRUE;MODE=MYSQL
+    driverClassName: org.h2.Driver
+    username: sa
+    password: password
+  jpa:
+    database-platform: org.hibernate.dialect.MySQL
+    hibernate:
+      ddl-auto: none
+    show-sql: true
+  h2:
+    console:
+      enabled: true
+  sql:
+    init:
+      mode: always
+      schema-locations: classpath:schema.sql
+      data-locations: classpath:data.sql
+hibernate:
+  globally_quoted_identifiers: true
