@@ -23,7 +23,7 @@ public class FileReader {
         Map<Integer, List<String>> data = new HashMap<>();
         int i = 0;
         for (Row row : sheet) {
-            if (i == 100) break;
+            if (i == 1500) break;
             data.put(i, new ArrayList<>());
             for (Cell cell : row) {
                 if (requireNonNull(cell.getCellType()) == CellType.NUMERIC) {

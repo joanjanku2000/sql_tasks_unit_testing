@@ -1,6 +1,6 @@
 create table author
 (
-    full_name varchar(17) null,
+    full_name varchar(255) null,
     id        int auto_increment
         primary key
 );

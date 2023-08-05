@@ -18,13 +18,14 @@ public class InsertsGenerator {
     private static final String COMMA = ",";
     private static final String COLUMN = "#COLUMN";
     private static final String VALUE = "#VALUE";
-    private static final String SELECT_ID_QUERY = "SELECT id from " + TABLE_NAME + " where " + COLUMN + " = " + VALUE;
+    private static final String SELECT_ID_QUERY = "SELECT id from " + TABLE_NAME + " where " + COLUMN + " = " + VALUE + " limit 1";
 
 
     public static List<String> generateInserts(Map<Integer, List<String>> rowsMap) {
         List<String> sqls = new ArrayList<>();
         sqls.addAll(generateAuthorsInserts(rowsMap));
         sqls.addAll(generateBooksInserts(rowsMap));
+        sqls.addAll(generateAuthorBookInserts(rowsMap));
         return sqls;
     }
 
@@ -41,7 +42,7 @@ public class InsertsGenerator {
             }
         }
         for (String author : authors) {
-            result.add(INSERT.replace(TABLE_NAME, AUTHOR).replace(ARGS, AUTHOR_ARGS).replace(VALUES, wrapString(author)));
+            result.add(INSERT.replace(TABLE_NAME, AUTHOR).replace(ARGS, AUTHOR_ARGS).replace(VALUES, wrapString(author.replace("\'",""))));
         }
         return result;
     }
@@ -68,7 +69,32 @@ public class InsertsGenerator {
         return result;
     }
 
+    private static List<String> generateAuthorBookInserts(Map<Integer, List<String>> rowsMap) {
+        List<String> result = new ArrayList<>();
+        for (Map.Entry<Integer, List<String>> row : rowsMap.entrySet()) {
+            if (row.getKey() != 0) {
+                List<String> values = row.getValue();
+                String[] aauthors = values.get(1) != null ? values.get(1).split("/") : new String[0];
+                String bookTitle = values.get(0).replaceAll("'", "").replaceAll("\"", "");
+                for (String author : aauthors) {
+
+                    String authorIdSelect = SELECT_ID_QUERY.replace(TABLE_NAME, AUTHOR).replace(COLUMN, "full_name").replace(VALUE, wrapString(author.replace("\'","")));
+                    String bookIdSelect = SELECT_ID_QUERY.replace(TABLE_NAME, BOOK).replace(COLUMN, "title").replace(VALUE, wrapString(bookTitle.replace("\'","")));
+                    String insert = INSERT.replace(TABLE_NAME, AUTHOR_BOOK).replace(ARGS, AUTHOR_BOOK_ARGS).replace(VALUES, wrap(authorIdSelect) + COMMA + wrap(bookIdSelect));
+                    result.add(insert);
+                }
+            }
+
+        }
+        return result;
+
+    }
+
     private static String wrapString(String v) {
         return SINGLE_QUOTE + v + SINGLE_QUOTE;
+    }
+
+    private static String wrap(String v) {
+        return "(" + v + ")";
     }
 }
